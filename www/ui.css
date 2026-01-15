@@ -1,0 +1,134 @@
+ :root{
+   --bg-grad: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      --card: #ffffff;
+      --surface: #ffffff;
+      --text-color: #1e1b4b;
+      --muted: #6b7280;
+      --subtitle: rgba(30,27,75,0.65);
+      --accent: #4f46e5;
+      --accent-2: #1e1b4b;
+      --glass: rgba(255,255,255,0.9);
+      --shadow: 0 10px 40px rgba(0,0,0,0.1);
+      --radius: 16px;
+      --transition: all 0.3s ease;
+      /* component colors */
+      --upload-bg: #f9fafb;
+      --input-border: #e5e7eb;
+      --segmented-bg: #f3f4f6;
+      --ghost-border: #e5e7eb;
+      --success-bg: #d1fae5;
+      --success-color: #065f46;
+      --error-bg: #fee2e2;
+      --error-color: #991b1b;
+      --spinner-border: #e5e7eb;
+    }
+    *{box-sizing: border-box}
+    html, body{height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: var(--text-color); -webkit-font-smoothing: antialiased}
+    /* animated interactive gradient */
+    body{
+      background-image: var(--bg-grad);
+      background-size: 200% 200%;
+      background-position: var(--bg-x,50%) var(--bg-y,50%);
+      transition: background-position 0.3s ease;
+      animation: bgShift 12s ease-in-out infinite;
+    }
+
+    @keyframes bgShift{
+      0%{background-position:10% 50%}
+      50%{background-position:90% 50%}
+      100%{background-position:10% 50%}
+    }
+    .wrap{width:100%; height:100vh; margin: 0; padding: 22px; display:flex; flex-direction:column; gap:12px}
+    .header{text-align: center; margin-bottom: 20px; position: relative}
+    .logo{width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #7c3aed); display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 24px; margin-bottom: 10px}
+    .logo{animation: logoFloat 6s ease-in-out infinite;}
+    h1{margin: 0; font-size: 24px; font-weight: 700}
+    .subtitle{color: var(--subtitle); margin-top: 5px; font-size: 14px}
+
+    .theme-toggle{position:absolute; right:18px; top:14px; padding:8px 10px; border-radius:10px; font-size:18px}
+    @media (max-width:640px){ .theme-toggle{right:12px; top:10px; padding:6px 8px} }
+
+    /* Settings modal */
+    .settings-modal{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:120}
+    .settings-card{background:var(--card);border-radius:12px;padding:18px;min-width:320px;max-width:720px;box-shadow:0 10px 40px rgba(0,0,0,0.25)}
+    .settings-card h3{margin:0 0 8px 0}
+    .settings-card label{display:block;margin-top:8px;font-weight:600}
+    .settings-card input[type=number], .settings-card input[type=text], .settings-card select{width:100%;padding:8px;border-radius:8px;border:1px solid var(--input-border)}
+    .settings-sliders .slider-row{padding:6px 0}
+    .settings-sliders input[type=range]{width:100%; margin:0 6px; height:36px}
+    .settings-card .btn.small{padding:6px 10px;font-size:14px}
+    .btn.small{padding:6px 10px;font-size:14px}
+
+    .card{background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 28px; margin: 8px 0; transition: var(--transition); width:100%; height: calc(100vh - 120px); min-height: 640px; overflow:auto}
+    .card:hover{transform: translateY(-8px) scale(1.01); box-shadow: 0 20px 50px rgba(16,24,40,0.12)}
+
+    label{display: block; color: var(--muted); font-size: 15px; margin-bottom: 10px; font-weight: 600}
+    textarea#text{width: 100%; min-height: 160px; padding: 18px; border-radius: 14px; border: 2px solid var(--input-border); font-size: 17px; resize: vertical; transition: var(--transition); font-family: inherit; line-height:1.6}
+    textarea#text:focus{border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1)}
+
+    .upload-zone{border: 2px dashed var(--input-border); border-radius: 12px; padding: 28px; text-align: center; margin: 18px 0; transition: var(--transition); cursor: pointer; background: var(--upload-bg)}
+    .upload-zone:hover{border-color: var(--accent); background: rgba(79, 70, 229, 0.05); transform: translateY(-4px)}
+    .upload-zone.dragover{border-color: var(--accent); background: rgba(79, 70, 229, 0.1)}
+    .upload-zone p{margin: 0; color: var(--muted); font-size: 16px}
+    .upload-zone strong{color: var(--accent-2)}
+    .upload-zone img#preview{max-width: 100%; margin-top: 12px; border-radius: 8px; box-shadow: 0 6px 20px rgba(16,24,40,0.08); display:block; opacity: 0; transform: scale(0.98); transition: opacity 360ms ease, transform 360ms ease}
+    .upload-zone img#preview[src]{opacity: 1; transform: scale(1)}
+
+    .controls{display: flex; gap: 14px; align-items: center; margin-top: 18px; flex-wrap: wrap}
+    .segmented{display: flex; background: var(--segmented-bg); border-radius: 12px; padding: 4px; flex: 1}
+    .segmented button{border: 0; background: transparent; padding: 10px 16px; border-radius: 8px; cursor: pointer; color: var(--muted); font-weight: 500; transition: var(--transition); will-change: transform, box-shadow}
+    .segmented button:hover{transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,24,40,0.06)}
+    .segmented button.active{background: var(--surface); color: var(--accent-2); box-shadow: 0 8px 24px rgba(16,24,40,0.12); transform: translateY(-2px)}
+
+    /* Device IP input moved to Settings modal */
+
+    select#voiceSelect{width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--input-border); font-size: 16px; background: var(--surface); margin-top:6px}
+    select#voiceSelect:focus{border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.05)}
+    /* Ensure select text is visible in both themes */
+    select#voiceSelect, select#voiceSelect option{ color: var(--text-color); background: var(--surface); }
+    /* Improve contrast of select's placeholder/option on some platforms */
+    select#voiceSelect::-ms-expand{ display: block; }
+
+    .actions{display: flex; gap: 14px; align-items: center; margin-top: 18px; flex-wrap: wrap}
+    .btn{background: var(--accent); color: white; padding: 14px 20px; border-radius: 12px; border: 0; font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 16px; box-shadow: 0 8px 24px rgba(79,70,229,0.12)}
+    .btn:hover{background: #4338ca; transform: translateY(-3px); box-shadow: 0 18px 40px rgba(17,24,39,0.12)}
+    .btn:active{transform: translateY(-1px)}
+    .btn.ghost{background: transparent; border: 2px solid var(--ghost-border); color: var(--accent-2)}
+    .btn.ghost:hover{background: var(--accent); color: white}
+
+    .status{margin-top: 18px; padding: 14px; border-radius: 12px; background: var(--glass); color: var(--accent-2); font-weight: 600; display: flex; gap: 10px; align-items: center; transition: var(--transition)}
+    .status.success{background: var(--success-bg); color: var(--success-color)}
+    .status.error{background: var(--error-bg); color: var(--error-color)}
+    .spinner{width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--spinner-border); border-top-color: var(--accent); animation: spin 1s linear infinite}
+    @keyframes spin{to{transform: rotate(360deg)}}
+
+    @keyframes logoFloat{0%{transform: translateY(0)}50%{transform: translateY(-6px)}100%{transform: translateY(0)}}
+
+    @keyframes bgPulse{0%{filter: saturate(1)}50%{filter: saturate(1.05)}100%{filter: saturate(1)}}
+
+    audio{width: 100%; margin-top: 18px; border-radius: 8px}
+
+    footer{margin-top: 8px; color: var(--muted); font-size: 12px; text-align: center}
+
+    /* volume control */
+    input#volume{width:100%}
+
+    @media (max-width: 640px){
+      .wrap{padding: 12px}
+      .logo{width: 50px; height: 50px; font-size: 20px}
+      h1{font-size: 20px}
+      .card{padding: 14px}
+      textarea#text{min-height: 120px; font-size: 15px}
+      .controls{flex-direction: column; align-items: stretch}
+      .segmented{justify-content: center}
+      .actions{flex-direction: column}
+      .actions .btn{width: 100%}
+      /* Make settings modal full-width on small screens and easier to use */
+      .settings-card{min-width: auto; max-width: 96%; width: calc(100% - 24px); padding:16px; border-radius:10px; margin: 8px; max-height: 90vh; overflow:auto}
+      .settings-card .btn{width:100%; margin-bottom:8px}
+      .settings-card .btn.ghost{margin-bottom:8px}
+      .settings-card input, .settings-card select{padding:12px;font-size:16px}
+    }
+
+    /* small helper for preview in upload zone */
+    .upload-content{display:flex;flex-direction:column;align-items:center;gap:8px}

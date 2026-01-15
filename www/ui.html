@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="am">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1722">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <title>Amharic TTS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/ui.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo">አ</div>
+      <button id="installBtn" class="btn ghost" style="margin-left:8px;">Install</button>
+      <h1 style="font-family: 'Noto Sans Ethiopic', Inter, sans-serif;">የአማርኛ ጽሑፍ ወደ ድምጽ</h1>
+      <div class="subtitle" style="font-family: 'Noto Sans Ethiopic', Inter, sans-serif;">ጽሑፍን ያስገቡ ወይም ፎቶ ይጫኑ፣ ከዚያም ድምጽ ይፈጥሩና ወደ መሣሪያዎ ይላኩ</div>
+      <button id="settingsBtn" class="theme-toggle btn ghost" aria-label="Settings">⚙️</button>
+    </div>
+
+    <div class="card">
+      <label for="text">ጽሑፍ ያስገቡ</label>
+      <textarea id="text" placeholder="እዚህ ጽሑፍ ያስገቡ ወይም OCR ከፎቶ ይገነባ"></textarea>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-content">
+            <p>ፎቶን ወደዚህ ውስጥ ወይም እዚህ ጫን (OCR)</p>
+            <img id="preview" alt="የተቀረፀ ፎቶ" style="display:none" />
+          </div>
+      </div>
+
+      <label for="voiceSelect">ድምጽ / የድምጽ አይነት</label>
+      <select id="voiceSelect">
+        <option value="server">Google TTS (server)</option>
+        <option value="server_slow">Google TTS (server, slow)</option>
+        <option value="browser">Browser Speech (local)</option>
+      </select>
+
+      <!-- Rate / pitch / volume are configured in Settings modal. -->
+
+      <div class="controls">
+        <div class="segmented" role="tablist" aria-label="delivery method">
+          <button id="btnPush" class="active" data-val="push">ወደ መሣሪያ ላክ</button>
+          <button id="btnPull" data-val="pull">መሣሪያ ይውሰድ</button>
+        </div>
+      </div>
+
+      <!-- Device IP is managed in Settings -->
+      <div id="currentSettings" class="muted" style="margin:8px 0;font-size:0.95rem"></div>
+
+      <div class="actions">
+        <button id="convertSend" class="btn">ድምጽ ፍጠር እና ላክ</button>
+        <button id="playLocal" class="btn ghost">እዚህ ይጫወቱ</button>
+        <a href="/latest.mp3" class="btn ghost" style="text-decoration: none">ድምጽ አውርድ</a>
+      </div>
+
+      <div class="status" id="status">Ready</div>
+      <audio id="player" controls></audio>
+    </div>
+
+    <footer>ይህ የአማርኛ OCR → TTS መተግበሪያ ነው —  ፎቶዎችን በማንሳት እና በመጫን እንዲሁም በመፃፍ ወደ ድምፅ ይቀይሩ ፣ ድምጽን ይጫኑ ወይም ወደ መሣሪያዎ ይላክ (ኦፍላይንና ሞባይል ደጋፊ)</footer>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal" aria-hidden="true" style="display:none">
+    <div class="settings-card">
+      <h3>ማቀናበሪያዎች (Settings)</h3>
+      <label>መሣሪያ IP</label>
+      <input id="s_espIp" placeholder="192.168.1.50:5002" />
+
+      <label>ነገር የድምጽ (Default voice)</label>
+      <select id="s_voiceSelect">
+        <option value="server">Google TTS (server)</option>
+        <option value="server_slow">Google TTS (server slow)</option>
+        <option value="browser">Browser Speech (local)</option>
+      </select>
+
+      <div class="settings-sliders" style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+        <div class="slider-row" style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <label>የንግግር ፍጥነት (rate)</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn ghost small s-decr" data-target="s_rate_range">-</button>
+              <input id="s_rate_range" type="range" min="0.5" max="2" step="0.1" value="1" />
+              <button class="btn ghost small s-incr" data-target="s_rate_range">+</button>
+              <span id="s_rate_val" style="min-width:44px;text-align:center">1.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="slider-row" style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <label>ፒች (pitch)</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn ghost small s-decr" data-target="s_pitch_range">-</button>
+              <input id="s_pitch_range" type="range" min="0" max="2" step="0.1" value="1" />
+              <button class="btn ghost small s-incr" data-target="s_pitch_range">+</button>
+              <span id="s_pitch_val" style="min-width:44px;text-align:center">1.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="slider-row" style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <label>መጠን (volume)</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn ghost small s-decr" data-target="s_volume_range">-</button>
+              <input id="s_volume_range" type="range" min="0" max="1" step="0.05" value="1" />
+              <button class="btn ghost small s-incr" data-target="s_volume_range">+</button>
+              <span id="s_volume_val" style="min-width:44px;text-align:center">1.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <label style="margin-top:8px"><input id="s_autoplay" type="checkbox" /> ማንቀሳቀስ (Autoplay generated audio)</label>
+      <label><input id="s_themeDark" type="checkbox" /> ያለውን ገጽታ ያስቀይሩ (Dark theme)</label>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="saveSettings" class="btn">አስቀምጥ (Save)</button>
+        <button id="testDevice" class="btn ghost">መሣሪያ ሙከራ (Test)</button>
+        <button id="resetSettings" class="btn ghost">ዳግም ያንሱ (Reset)</button>
+        <button id="closeSettings" class="btn ghost">መዝጊያ (Close)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/ui.js"></script>
+  <script src="/static/ui1.js"></script>
+</body>
+</html>

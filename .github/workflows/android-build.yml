@@ -63,8 +63,14 @@ jobs:
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
     - name: Build Android APK
-      working-directory: android
       run: |
+        # Ensure the android project exists (npx cap add may have been skipped previously)
+        if [ ! -d android ]; then
+          echo "android/ directory missing — attempting to add Capacitor Android platform"
+          npx @capacitor/cli@latest add android || { echo 'Failed to add android platform'; exit 1; }
+        fi
+        ls -la android || true
+        cd android
         chmod +x ./gradlew
         ./gradlew assembleDebug -Pandroid.injected.testOnly=false --no-daemon
 
