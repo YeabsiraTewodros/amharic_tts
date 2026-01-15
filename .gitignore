@@ -1,0 +1,9 @@
+# Local environment variables
+.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Local SQLite DB
+amharic_tts.db

@@ -1,0 +1,6 @@
+Flask
+gTTS
+Pillow
+pytesseract
+SQLAlchemy
+psycopg2-binary

@@ -1,0 +1,15 @@
+{
+  "name": "amharic-tts-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prepare:web": "node tools/copy_web.js",
+    "cap:init": "npx @capacitor/cli@latest init amharic-tts --web-dir=www --bundled=false",
+    "cap:add:android": "npx @capacitor/cli@latest add android",
+    "cap:copy": "npx @capacitor/cli@latest copy",
+    "open:android": "npx @capacitor/cli@latest open android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.0.0"
+  }
+}

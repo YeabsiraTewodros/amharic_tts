@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.amharictts",
+  "appName": "AmharicTTS",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

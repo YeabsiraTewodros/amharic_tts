@@ -1,0 +1,19 @@
+[Unit]
+Description=Pi Audio Receiver (pi_player)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/pi/pi_player.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+# To install: copy this file to /etc/systemd/system/pi_player.service, then:
+# sudo systemctl daemon-reload
+# sudo systemctl enable --now pi_player.service
