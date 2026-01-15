@@ -25,6 +25,9 @@ jobs:
     - name: Install Capacitor CLI
       run: npm install @capacitor/cli@latest --no-save
 
+    - name: Install Capacitor runtime packages
+      run: npm install @capacitor/core@latest @capacitor/android@latest --no-save
+
     - name: Initialize Capacitor Android project
       run: |
         npx @capacitor/cli@latest init amharic-tts --web-dir=www --bundled=false --appName="AmharicTTS" || true
