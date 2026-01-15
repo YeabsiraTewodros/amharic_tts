@@ -42,11 +42,11 @@ jobs:
     - name: Sync Capacitor Android (plugins & native files)
       run: npx @capacitor/cli@latest sync android || true
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
 
     - name: Install Android SDK command-line tools
       run: |
