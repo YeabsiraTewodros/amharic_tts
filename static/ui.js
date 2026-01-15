@@ -14,6 +14,19 @@
       s.innerHTML = (busy? '<span class="spinner"></span>' : '') + ' ' + txt;
     }
 
+    // API base helper: read from localStorage `API_BASE`, fallback to location.origin
+    function apiBase(){
+      try{ const v = (localStorage.getItem('API_BASE') || '').trim(); if(v) return v.replace(/\/$/, ''); }catch(e){}
+      return location.origin.replace(/\/$/, '');
+    }
+
+    function apiUrl(path){
+      const base = apiBase();
+      if(!path) return base;
+      if(path.startsWith('/')) return base + path;
+      return base + '/' + path;
+    }
+
     // Camera helpers and server-side OCR upload
     let _stream = null;
     const videoModalHtml = `
@@ -66,7 +79,7 @@
       try{ const prev = document.getElementById('preview'); prev.src = URL.createObjectURL(file); prev.style.display = 'block'; }catch(e){}
       try{
         const fd = new FormData(); fd.append('image', file, file.name || 'capture.jpg');
-        const res = await fetch('/ocr_upload', { method: 'POST', body: fd });
+        const res = await fetch(apiUrl('/ocr_upload'), { method: 'POST', body: fd });
         if(!res.ok){ const j = await res.json().catch(()=>null); setStatus('OCR error: ' + (j&&j.error?j.error:res.statusText)); return; }
         const j = await res.json();
         const text = (j.text||'').trim();
@@ -93,7 +106,7 @@
       setStatus('Uploading image for OCR...', true);
       try{
         const fd = new FormData(); fd.append('image', blob, 'capture.jpg');
-        const res = await fetch('/ocr_upload', { method: 'POST', body: fd });
+        const res = await fetch(apiUrl('/ocr_upload'), { method: 'POST', body: fd });
         if(!res.ok){
           // try to show server response body for debugging
           let body = await res.text().catch(()=>null);
@@ -121,7 +134,7 @@
     async function sendToESPByPush(ip, blob){ setStatus('Pushing MP3 to ' + ip + '...', true);
       try{ const res = await fetch('http://' + ip + '/play',{method:'POST',headers:{'Content-Type':'audio/mpeg'},body:blob}); if(res.ok){ setStatus('ESP32 accepted audio (push).', false, 'success'); return true; } setStatus('ESP32 push failed: ' + res.status, false, 'error'); return false; }catch(e){ setStatus('ESP32 push error: ' + e, false, 'error'); return false; } }
 
-    async function instructESPtoPull(ip){ setStatus('Instructing ESP32 to fetch latest.mp3...', true); const url = encodeURIComponent(location.origin + '/latest.mp3'); try{ const res = await fetch('http://' + ip + '/play_url?url=' + url); if(res.ok){ setStatus('ESP32 instructed to pull latest.mp3.', false, 'success'); return true } setStatus('ESP32 instruct failed: ' + res.status, false, 'error'); return false; }catch(e){ setStatus('ESP32 instruct error: ' + e, false, 'error'); return false; } }
+    async function instructESPtoPull(ip){ setStatus('Instructing ESP32 to fetch latest.mp3...', true); const url = encodeURIComponent(apiUrl('/latest.mp3')); try{ const res = await fetch('http://' + ip + '/play_url?url=' + url); if(res.ok){ setStatus('ESP32 instructed to pull latest.mp3.', false, 'success'); return true } setStatus('ESP32 instruct failed: ' + res.status, false, 'error'); return false; }catch(e){ setStatus('ESP32 instruct error: ' + e, false, 'error'); return false; } }
 
     // Drag and drop for upload zone
     const uploadZone = document.getElementById('uploadZone');
@@ -177,7 +190,7 @@
           // toggle play/pause if same source is loaded
           const shouldLoad = !p.src || !p.src.endsWith('/latest.mp3');
           if(shouldLoad){
-            p.src = '/latest.mp3';
+            p.src = apiUrl('/latest.mp3');
             const st = loadSettings() || {};
             const vol = parseFloat(st.volume ?? 1);
             const playRate = parseFloat(st.rate ?? 1);
@@ -246,6 +259,7 @@
     const testDeviceBtn = document.getElementById('testDevice');
 
     const s_espIp = document.getElementById('s_espIp');
+    const s_apiBase = document.getElementById('s_apiBase');
     const s_voiceSelect = document.getElementById('s_voiceSelect');
     const s_rate = document.getElementById('s_rate_range');
     const s_rate_val = document.getElementById('s_rate_val');
@@ -261,6 +275,7 @@
     function openSettings(){
       const st = loadSettings();
       s_espIp.value = st.espIp || '';
+      if(s_apiBase) s_apiBase.value = st.apiBase || '';
       s_voiceSelect.value = st.voice || document.getElementById('voiceSelect').value || 'server';
       if(s_rate){ s_rate.value = (st.rate !== undefined) ? st.rate : 1; s_rate_val.textContent = parseFloat(s_rate.value).toFixed(1); }
       if(s_pitch){ s_pitch.value = (st.pitch !== undefined) ? st.pitch : 1; s_pitch_val.textContent = parseFloat(s_pitch.value).toFixed(1); }
@@ -375,14 +390,16 @@
     closeSettings?.addEventListener('click', closeSettingsModal);
     resetSettings?.addEventListener('click', ()=>{
       localStorage.removeItem(SETTINGS_KEY);
+      try{ localStorage.removeItem('API_BASE'); }catch(e){}
       const st = loadSettings();
       applySettings(st);
       setStatus('Settings reset', false, 'success');
     });
     testDeviceBtn?.addEventListener('click', testDevice);
     saveSettings?.addEventListener('click', ()=>{
-      const obj = { espIp: (s_espIp.value||'').trim(), voice: s_voiceSelect.value, rate: parseFloat(s_rate.value), pitch: parseFloat(s_pitch.value), volume: parseFloat(s_volume.value), autoplay: !!s_autoplay.checked, themeDark: !!s_themeDark.checked };
+      const obj = { espIp: (s_espIp.value||'').trim(), apiBase: (s_apiBase?.value||'').trim(), voice: s_voiceSelect.value, rate: parseFloat(s_rate.value), pitch: parseFloat(s_pitch.value), volume: parseFloat(s_volume.value), autoplay: !!s_autoplay.checked, themeDark: !!s_themeDark.checked };
       saveSettingsToStorage(obj);
+      try{ localStorage.setItem('API_BASE', obj.apiBase || ''); }catch(e){}
       applySettings(obj);
       setStatus('Settings saved', false, 'success');
       closeSettingsModal();
@@ -449,7 +466,7 @@
         // only autoplay if user enabled it in Settings
         const shouldAuto = (st && typeof st.autoplay !== 'undefined') ? !!st.autoplay : true;
         if(shouldAuto){ p.play().catch(()=>{}); }
-        try{ await fetch('/latest.mp3'); }catch(e){}
+        try{ await fetch(apiUrl('/latest.mp3')); }catch(e){}
         if(!espIp){ setStatus('Converted; playing locally.'); return; }
         if(method === 'push'){ const ok = await sendToESPByPush(espIp, blob); if(!ok){ setStatus('Push failed, trying instruct fallback...'); await instructESPtoPull(espIp); } } else { await instructESPtoPull(espIp); }
       }catch(e){ setStatus('Error: ' + e); }
